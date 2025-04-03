@@ -1,0 +1,30 @@
+
+services:
+  lfs-docker:
+    container_name: lfs-docker
+    tty: true
+    hostname: lfs-docker
+    build:
+      context: ./srcs
+    env_file:
+      - .env
+    volumes:
+      - /dev/sdb:/dev/sdb
+      - lfs_persist:/persist
+      - lfs_srcs:/home/lfs/srcs
+
+volumes:
+  lfs_persist:
+    name: lfs-persist
+    driver: local
+    driver_opts:
+      type: none
+      device: ./persist
+      o: bind
+  lfs_srcs:
+    name: lfs-srcs
+    driver: local
+    driver_opts:
+      type: none
+      device: ./srcs
+      o: bind
