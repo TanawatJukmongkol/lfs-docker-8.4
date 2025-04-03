@@ -7,7 +7,7 @@ services:
     build:
       context: ./srcs
     env_file:
-      - .env
+      - .config
     volumes:
       - /dev/sdb:/dev/sdb
       - lfs_persist:/persist
