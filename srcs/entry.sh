@@ -1,7 +1,8 @@
 echo "> Chown /persist, /home/lfs, and /mnt to lfs user"
 chown -R lfs:lfs /persist
 chown -R lfs:lfs /home/lfs
-chown -R lfs:lfs /mnt
+mkdir -p $LFS
+chown -R lfs:lfs $LFS
 
 echo "> Generate user space defaults..."
 su lfs -c "bash ./srcs/scripts/userspace_default.sh"
