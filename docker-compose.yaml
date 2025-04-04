@@ -12,6 +12,7 @@ services:
     env_file:
       - .config
     volumes:
+      - /mnt:/mnt
       - /dev/kvm:/dev/kvm
       - lfs_persist:/persist
       - lfs_srcs:/home/lfs/srcs

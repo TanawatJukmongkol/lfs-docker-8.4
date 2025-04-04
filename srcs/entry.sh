@@ -15,6 +15,7 @@ echo "> Chown /home/lfs/srcs back to root"
 chown -R root:root /home/lfs/srcs
 
 echo "$ SHELL"
+
 bash ./srcs/scripts/mount.sh
 su lfs
 bash ./srcs/scripts/umount.sh
