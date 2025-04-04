@@ -12,6 +12,8 @@ part-add /dev/sda p 6293507 -2048
 mkfs ext4 /dev/sda4
 mount /dev/sda4 /
 mkdir /boot
+mkdir /tools
+mkdir /sources
 mount /dev/sda2 /boot
 mkdir /boot/efi
 mount /dev/sda1 /boot/efi

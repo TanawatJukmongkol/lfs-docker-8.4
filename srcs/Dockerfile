@@ -12,17 +12,17 @@ g++ \
 gawk \
 texinfo \
 m4 \
+libmpc-dev \
 patch \
 python3 \
-libguestfs-tools \
 kmod \
-cargo \
-neovim \
-tree
+flex \
+tree \
+libguestfs-tools
 
 # qemu \
 # qemu-utils \
-# qemu-system-x86 \
+# nbd-client \
 
 RUN     groupadd lfs
 RUN     useradd -s /bin/bash -g lfs -u 1000 -k /dev/null -m lfs

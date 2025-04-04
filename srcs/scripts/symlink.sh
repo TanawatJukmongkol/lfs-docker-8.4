@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Link $LFS/tools to /tools
+ln -s $LFS/tools /
+
 # Link bashrc and bash_profile
 ln -s  /home/lfs/srcs/.bash_profile /home/lfs/.bash_profile
 ln -s  /home/lfs/srcs/.bashrc       /home/lfs/.bashrc
