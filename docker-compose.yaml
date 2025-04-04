@@ -3,13 +3,16 @@ services:
   lfs-docker:
     container_name: lfs-docker
     tty: true
+    privileged: true
+    cap_add:
+      - ALL
     hostname: lfs-docker
     build:
       context: ./srcs
     env_file:
       - .config
     volumes:
-      - /dev/sdb:/dev/sdb
+      - /dev/kvm:/dev/kvm
       - lfs_persist:/persist
       - lfs_srcs:/home/lfs/srcs
 

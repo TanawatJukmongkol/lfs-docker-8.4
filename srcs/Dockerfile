@@ -14,14 +14,15 @@ texinfo \
 m4 \
 patch \
 python3 \
-qemu \
-qemu-utils \
-qemu-system-x86 \
 libguestfs-tools \
 kmod \
 cargo \
 neovim \
 tree
+
+# qemu \
+# qemu-utils \
+# qemu-system-x86 \
 
 RUN     groupadd lfs
 RUN     useradd -s /bin/bash -g lfs -u 1000 -k /dev/null -m lfs
@@ -34,6 +35,9 @@ RUN		chown root -R /home/lfs
 
 RUN     yes lfs | passwd root
 RUN     yes lfs | passwd lfs
+
+RUN     echo "# Dockerfile generated config" >> /etc/fuse.conf
+RUN     echo "user_allow_other" >> /etc/fuse.conf
 
 EXPOSE  22 5900 8006
 
