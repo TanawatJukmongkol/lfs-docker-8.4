@@ -36,8 +36,9 @@ RUN		chown root -R /home/lfs
 RUN     yes lfs | passwd root
 RUN     yes lfs | passwd lfs
 
-RUN     echo "# Dockerfile generated config" >> /etc/fuse.conf
-RUN     echo "user_allow_other" >> /etc/fuse.conf
+RUN     echo "# Dockerfile generated config"     > /etc/fuse.conf
+RUN     echo "#mount_max = 1000"                >> /etc/fuse.conf
+RUN     echo "user_allow_other"                 >> /etc/fuse.conf
 
 EXPOSE  22 5900 8006
 
