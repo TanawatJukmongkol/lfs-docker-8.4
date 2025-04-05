@@ -1,10 +1,15 @@
-BUILD_DIR=/mnt/lfs/sources/build/
+BUILD_DIR=/persist/lfs/build/gcc/
 BUILD_JOBS=16
+
+mkdir -p $BUILD_DIR
 
 # Wget
 # Binutils-2.32
 wget http://ftp.gnu.org/gnu/binutils/binutils-2.32.tar.xz --continue --directory-prefix=$LFS/sources &
 # GCC-8.2.0
+wget http://www.mpfr.org/mpfr-4.0.2/mpfr-4.0.2.tar.xz --continue --directory-prefix=$LFS/sources &
+wget http://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.xz --continue --directory-prefix=$LFS/sources &
+wget https://ftp.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz --continue --directory-prefix=$LFS/sources &
 wget http://ftp.gnu.org/gnu/gcc/gcc-8.2.0/gcc-8.2.0.tar.xz --continue --directory-prefix=$LFS/sources &
 # Linux-4.20.12
 wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.20.12.tar.xz --continue --directory-prefix=$LFS/sources &
