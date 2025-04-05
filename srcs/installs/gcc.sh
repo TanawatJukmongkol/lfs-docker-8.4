@@ -3,9 +3,15 @@ BUILD_JOBS=16
 
 # Wget
 # Binutils-2.32
+wget http://ftp.gnu.org/gnu/binutils/binutils-2.32.tar.xz --continue --directory-prefix=$LFS/sources &
 # GCC-8.2.0
+wget http://ftp.gnu.org/gnu/gcc/gcc-8.2.0/gcc-8.2.0.tar.xz --continue --directory-prefix=$LFS/sources &
 # Linux-4.20.12
+wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.20.12.tar.xz --continue --directory-prefix=$LFS/sources &
 # Glibc-2.29 
+wget http://ftp.gnu.org/gnu/glibc/glibc-2.29.tar.xz --continue --directory-prefix=$LFS/sources &
+
+wait
 
 pushd () {
     command pushd "$@" > /dev/null
