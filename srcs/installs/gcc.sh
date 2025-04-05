@@ -1,4 +1,4 @@
-
+BUILD_DIR=/mnt/lfs/sources/build/
 BUILD_JOBS=16
 
 # Wget
@@ -27,35 +27,35 @@ install_package () {
   pname=$install_version'_'$tarball
 
   pushd /mnt/lfs/sources
-  if [ -e ~/build/$pname.installed ]; then
+  if [ -e $BUILD_DIR/$pname.installed ]; then
     echo $tarball was already installed. skip...
     return
   else
     echo "Installing $1..."
     if [ ! "$2" = "" ] && [ ! $2 = 1 ]; then
       prev_version=$(( $install_version - 1 ))'_'$1.installed
-      if [ ! -e ~/build/$prev_version ]; then
+      if [ ! -e $BUILD_DIR/$prev_version ]; then
         echo $prev_version, not found! Terminated.
         exit 1
       fi
       echo "Upgrading $1 to #$install_version..."
-      mv ~/build/$prev_version ~/build/$pname
-      touch ~/build/$prev_version
-      pushd ~/build/$pname
-        (eval "$(cat /dev/stdin)" ; mv ~/build/$pname ~/build/$pname.installed) \
-        || mv ~/build/$pname ~/build/$prev_version # revert back the name if failed
+      mv $BUILD_DIR/$prev_version $BUILD_DIR/$pname
+      touch $BUILD_DIR/$prev_version
+      pushd $BUILD_DIR/$pname
+        (eval "$(cat /dev/stdin)" ; mv $BUILD_DIR/$pname $BUILD_DIR/$pname.installed) \
+        || mv $BUILD_DIR/$pname $BUILD_DIR/$prev_version # revert back the name if failed
       popd
       return
     else
-      mkdir -p ~/build/$pname
-      tar -xvf $tarball -C ~/build/$pname --strip-components=1
+      mkdir -p $BUILD_DIR/$pname
+      tar -xvf $tarball -C $BUILD_DIR/$pname --strip-components=1
     fi
   fi
   popd
 
-  pushd ~/build/$pname
+  pushd $BUILD_DIR/$pname
     eval "$(cat /dev/stdin)" || (echo "Error installing $pname. Terminated."; exit 1)
-    mv ~/build/$pname ~/build/$pname.installed
+    mv $BUILD_DIR/$pname $BUILD_DIR/$pname.installed
   popd
 }
 

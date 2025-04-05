@@ -14,6 +14,7 @@ mount /dev/sda4 /
 mkdir /boot
 mkdir /tools
 mkdir /sources
+mkdir /sources/build
 mount /dev/sda2 /boot
 mkdir /boot/efi
 mount /dev/sda1 /boot/efi
