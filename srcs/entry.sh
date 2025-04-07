@@ -11,9 +11,6 @@ bash ./srcs/scripts/symlink.sh
 echo "> User space scripts"
 su lfs -c "bash ./srcs/scripts/userspace.sh"
 
-echo "> Chown /home/lfs/srcs back to root"
-chown -R root:root /home/lfs/srcs
-
 echo "$ SHELL"
 bash ./srcs/scripts/mount.sh
 su lfs

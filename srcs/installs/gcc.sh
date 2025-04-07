@@ -1,69 +1,22 @@
+#!/usr/bin/env bash
+
+source $(dirname "$0")/utils.sh
+
 BUILD_DIR=/persist/home/lfs/build/gcc/
 SRC_DIR=/mnt/lfs/sources/
 BUILD_JOBS=16
 
 mkdir -p $BUILD_DIR
 
-# Wget
-# Binutils-2.32
-wget http://ftp.gnu.org/gnu/binutils/binutils-2.32.tar.xz --continue --directory-prefix=$SRC_DIR &
-# GCC-8.2.0
-wget http://www.mpfr.org/mpfr-4.0.2/mpfr-4.0.2.tar.xz --continue --directory-prefix=$SRC_DIR &
-wget http://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.xz --continue --directory-prefix=$SRC_DIR &
-wget https://ftp.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz --continue --directory-prefix=$SRC_DIR &
-wget http://ftp.gnu.org/gnu/gcc/gcc-8.2.0/gcc-8.2.0.tar.xz --continue --directory-prefix=$SRC_DIR &
-# Linux-4.20.12
-wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.20.12.tar.xz --continue --directory-prefix=$SRC_DIR &
-# Glibc-2.29 
-wget http://ftp.gnu.org/gnu/glibc/glibc-2.29.tar.xz --continue --directory-prefix=$SRC_DIR &
-
-wait
-
-pushd () {
-    command pushd "$@" > /dev/null
-}
-
-popd () {
-    command popd "$@" > /dev/null
-}
-
-install_package () {
-  tarball=$1
-  install_version=$2
-  pname=$install_version'_'$tarball
-
-  pushd $SRC_DIR
-  if [ -e $BUILD_DIR/$pname.installed ]; then
-    echo $tarball was already installed. skip...
-    return
-  else
-    echo "Installing $1..."
-    if [ ! "$2" = "" ] && [ ! $2 = 1 ]; then
-      prev_version=$(( $install_version - 1 ))'_'$1.installed
-      if [ ! -e $BUILD_DIR/$prev_version ]; then
-        echo $prev_version, not found! Terminated.
-        exit 1
-      fi
-      echo "Upgrading $1 to #$install_version..."
-      mv $BUILD_DIR/$prev_version $BUILD_DIR/$pname
-      touch $BUILD_DIR/$prev_version
-      pushd $BUILD_DIR/$pname
-        (eval "$(cat /dev/stdin)" ; mv $BUILD_DIR/$pname $BUILD_DIR/$pname.installed) \
-        || mv $BUILD_DIR/$pname $BUILD_DIR/$prev_version # revert back the name if failed
-      popd
-      return
-    else
-      mkdir -p $BUILD_DIR/$pname
-      tar -xvf $tarball -C $BUILD_DIR/$pname --strip-components=1
-    fi
-  fi
-  popd
-
-  pushd $BUILD_DIR/$pname
-    (eval "$(cat /dev/stdin)" ; mv $BUILD_DIR/$pname $BUILD_DIR/$pname.installed) \
-    || (echo "Error installing $pname. Terminated."; exit 1)
-  popd
-}
+wget_list << EOF
+http://ftp.gnu.org/gnu/binutils/binutils-2.32.tar.xz
+http://www.mpfr.org/mpfr-4.0.2/mpfr-4.0.2.tar.xz
+http://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.xz
+https://ftp.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz
+http://ftp.gnu.org/gnu/gcc/gcc-8.2.0/gcc-8.2.0.tar.xz
+https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.20.12.tar.xz
+http://ftp.gnu.org/gnu/glibc/glibc-2.29.tar.xz
+EOF
 
 # Pass 1
 # Binutils-2.32

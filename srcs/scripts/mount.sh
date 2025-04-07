@@ -2,7 +2,6 @@
 mkdir -p $LFS
 
 if [ "$HOST_USER" = "root" ]; then
-    # qemu-nbd -c /dev/nbd0 ./persist/home/lfs/build/lfs.qcow2
     mount /dev/nbd0p4 $LFS
     mount /dev/nbd0p2 $LFS/boot
     mount /dev/nbd0p1 $LFS/boot/efi
