@@ -12,9 +12,10 @@ else
 	mount "$LFS_LOOP"p2 $LFS/boot && \
 	mkdir -p $LFS/boot/efi && \
 	mount "$LFS_LOOP"p1 $LFS/boot/efi && \
-	chown lfs:lfs $LFS
 	echo "Mount successfully!"
 fi
 
 mkdir -p $LFS/tools $LFS/sources
 chmod -v a+wt $LFS/sources
+chown lfs:lfs -R $LFS
+
