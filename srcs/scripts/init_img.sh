@@ -1,4 +1,8 @@
 
+if [ "$HOST_USER" = "root" ]; then
+    exit
+fi
+
 # Generate disk image
 if [ ! -f "$LFS_IMG" ]; then
     echo "> Creating qcow2 disk image..."

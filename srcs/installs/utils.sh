@@ -34,7 +34,11 @@ install_package () {
       return
     else
       mkdir -p $BUILD_DIR/$pname
-      tar -xvf $tarball -C $BUILD_DIR/$pname --strip-components=1
+      if echo "$tarball" | grep -a "tar.gz"; then
+        tar -xvzf $tarball -C $BUILD_DIR/$pname --strip-components=1
+      else
+        tar -xvf  $tarball -C $BUILD_DIR/$pname --strip-components=1
+      fi
     fi
   fi
   popd
@@ -73,6 +77,7 @@ wget_list () {
     wget_script &
     pids="$! $pids"
     urls="$i $urls"
+    sleep 0.25
   done
   # Wait on pids (and exit on error)
   werr=0

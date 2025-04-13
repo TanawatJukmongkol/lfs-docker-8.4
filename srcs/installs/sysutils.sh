@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-source $(dirname "$0")/utils.sh
+source utils.sh
+source wget_list.sh
 
 BUILD_DIR=/persist/home/lfs/build/sysutils/
 SRC_DIR=/mnt/lfs/sources/
-BUILD_JOBS=16
 
 mkdir -p $BUILD_DIR
 

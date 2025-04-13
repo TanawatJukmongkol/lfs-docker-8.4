@@ -19,20 +19,17 @@ python3 \
 kmod \
 flex \
 tree \
-libguestfs-tools
-
-# qemu \
-# qemu-utils \
-# nbd-client \
+libguestfs-tools \
+sudo
 
 RUN     groupadd lfs
 RUN     useradd -s /bin/bash -g lfs -u 1000 -k /dev/null -m lfs
 
+RUN		adduser lfs sudo
+RUN		echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
 RUN		mkdir -p /persist
 RUN		mkdir -p /home/lfs/srcs
-
-# To reset back to host user owned directory.
-RUN		chown root -R /home/lfs
 
 RUN     yes lfs | passwd root
 RUN     yes lfs | passwd lfs

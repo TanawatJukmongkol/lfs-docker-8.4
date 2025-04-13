@@ -1,11 +1,17 @@
+echo "Unmounting $LFS_IMG..."
 
-if [ "$HOST_USER" = "root" ]; then
-    # qemu-nbd -c /dev/nbd0 ./persist/home/lfs/build/lfs.qcow2
-    umount $LFS/boot/efi
-    umount $LFS/boot
-    umount $LFS
-else
-    echo "Unmounting $LFS_IMG..."
+umount -q -R $LFS/dev/pts
+umount -q -R $LFS/dev
+umount -q $LFS/proc
+umount -q $LFS/sys
+umount -q $LFS/run
+
+if [ ! "$HOST_USER" = "root" ]; then
     guestunmount $LFS && \
     echo "Unmount successfully!"
+else
+	umount $LFS/boot/efi && \
+	umount $LFS/boot && \
+	umount $LFS && \
+	echo "Unmount successfully!"
 fi

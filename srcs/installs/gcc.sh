@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 
-source $(dirname "$0")/utils.sh
+source utils.sh
 
 BUILD_DIR=/persist/home/lfs/build/gcc/
 SRC_DIR=/mnt/lfs/sources/
-BUILD_JOBS=16
 
 mkdir -p $BUILD_DIR
 
 wget_list << EOF
 http://ftp.gnu.org/gnu/binutils/binutils-2.32.tar.xz
-http://www.mpfr.org/mpfr-4.0.2/mpfr-4.0.2.tar.xz
+https://ftp.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.xz
 http://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.xz
 https://ftp.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz
 http://ftp.gnu.org/gnu/gcc/gcc-8.2.0/gcc-8.2.0.tar.xz
@@ -43,9 +42,10 @@ make -j$BUILD_JOBS $MAKE_FLAGS install
 
 EOF
 
+
 # GCC-8.2.0
 
-status=status&&install_package gcc-8.2.0.tar.xz 1 << EOF
+install_package gcc-8.2.0.tar.xz 1 << EOF
 
 tar -xf $SRC_DIR/mpfr-4.0.2.tar.xz
 mv -v mpfr-4.0.2 mpfr
@@ -129,7 +129,7 @@ cd       build
 ../configure                             \
       --prefix=/tools                    \
       --host=$LFS_TGT                    \
-      --build=$(../scripts/config.guess) \
+      --build=\$(../scripts/config.guess) \
       --enable-kernel=3.2                \
       --with-headers=/tools/include
 
@@ -147,8 +147,9 @@ EOF
 
 install_package gcc-8.2.0.tar.xz 2 << EOF
 
+rm -rf   build
+mkdir -v build
 cd       build
-rm       ./config.cache
 
 ../libstdc++-v3/configure           \
     --host=$LFS_TGT                 \
@@ -168,6 +169,8 @@ EOF
 # Binutils-2.32 - Pass 2
 
 install_package binutils-2.32.tar.xz 2 << EOF
+
+rm -rf   build
 
 mkdir -v build
 cd       build
@@ -199,7 +202,7 @@ install_package gcc-8.2.0.tar.xz 3 << EOF
 rm -rf build
 
 cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
-  `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/include-fixed/limits.h
+  \$(dirname \$($LFS_TGT-gcc -print-libgcc-file-name))/include-fixed/limits.h
 
 for file in gcc/config/{linux,i386/linux{,64}}.h
 do

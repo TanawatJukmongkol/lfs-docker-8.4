@@ -1,3 +1,5 @@
+include .config
+export
 
 all: build shell
 
@@ -8,14 +10,18 @@ build: persist
 	docker compose build
 
 shell:
-	@if [ "$LFS_IMG" = "root" ]; then \
-		modprobe nbd max_part=16; \
-		qemu-nbd -c /dev/nbd0 ./"$LFS_IMG"; \
+	@- if [ "$(shell whoami)" = "root" ]; then \
+		echo "Notice: Enter as LFS docker as superuser mode."; \
+		modprobe nbd max_part=8; \
+		sleep 0.5; \
+		source ./srcs/scripts/init_img_root.sh; \
 	fi
 	docker compose run \
 		-e HOST_USER=$(shell whoami) \
 		--rm -it lfs-docker
-	@if [ "$LFS_IMG" = "root" ]; then \
+	@- if [ "$(shell whoami)" = "root" ]; then \
+		qemu-nbd -d ${LFS_LOOP}; \
+		sleep 0.2; \
 		rmmod nbd; \
 	fi
 

@@ -1,3 +1,5 @@
 
-source $(dirname "$0")/gcc.sh
-source $(dirname "$0")/sysutils.sh
+pushd $(dirname "$0")
+  bash $PWD/gcc.sh
+  bash $PWD/sysutils.sh
+popd

@@ -5,14 +5,16 @@ services:
     tty: true
     privileged: true
     cap_add:
-      - ALL
+      - SYS_ADMIN
     hostname: lfs-docker
     build:
       context: ./srcs
     env_file:
       - .config
-    volumes:
+    devices:
       - /dev/kvm:/dev/kvm
+      - /dev/fuse:/dev/fuse
+    volumes:
       - lfs_persist:/persist
       - lfs_srcs:/home/lfs/srcs
 
