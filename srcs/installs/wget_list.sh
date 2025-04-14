@@ -97,5 +97,9 @@ https://ftp.osuosl.org/pub/lfs/lfs-packages/8.3/man-pages-4.16.tar.xz
 https://ftp.osuosl.org/pub/lfs/lfs-packages/8.3/zlib-1.2.11.tar.xz
 https://ftp2.osuosl.org/pub/blfs/conglomeration/Linux-PAM/Linux-PAM-1.3.0.tar.bz2
 https://ftp2.osuosl.org/pub/blfs/conglomeration/Linux-PAM/Linux-PAM-1.2.0-docs.tar.bz2
+https://github.com/rhboot/efibootmgr/archive/17/efibootmgr-17.tar.gz
+https://github.com/rhboot/efivar/releases/download/37/efivar-37.tar.bz2
+https://www.linuxfromscratch.org/patches/blfs/11.0/efivar-37-gcc_9-1.patch
+ftp://ftp.rpm.org/pub/rpm/popt/releases/popt-1.x/popt-1.18.tar.gz
 EOF
 

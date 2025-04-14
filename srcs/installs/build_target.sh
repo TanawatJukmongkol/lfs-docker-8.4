@@ -1115,3 +1115,411 @@ cp    -v doc/{awkforai.txt,*.{eps,pdf,jpg}} /usr/share/doc/gawk-4.2.1
 
 EOF
 
+install_package findutils-4.6.0.tar.gz << EOF
+
+sed -i 's/test-lock..EXEEXT.//' tests/Makefile.in
+
+sed -i 's/IO_ftrylockfile/IO_EOF_SEEN/' gl/lib/*.c
+sed -i '/unistd/a #include <sys/sysmacros.h>' gl/lib/mountlist.c
+echo "#define _IO_IN_BACKUP 0x100" >> gl/lib/stdio-impl.h
+
+./configure --prefix=/usr --localstatedir=/var/lib/locate
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/bin/find /bin
+sed -i 's|find:=${BINDIR}|find:=/bin|' /usr/bin/updatedb
+
+EOF
+
+install_package groff-1.22.4.tar.gz << EOF
+
+PAGE=<paper_size> ./configure --prefix=/usr
+
+make -j1
+
+make install
+
+EOF
+
+install_package popt-1.18.tar.gz << EOF
+
+./configure --prefix=/usr --disable-static && \
+make -j$BUILD_JOBS $MAKE_FLAGS
+
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package efivar-37.tar.bz2 << EOF
+
+patch -Np1 -i $SRC_DIR/efivar-37-gcc_9-1.patch
+
+make -j$BUILD_JOBS $MAKE_FLAGS CFLAGS="-O2 -Wno-stringop-truncation"
+make -j$BUILD_JOBS $MAKE_FLAGS install LIBDIR=/usr/lib
+
+EOF
+
+install_package efibootmgr-17.tar.gz << EOF
+
+sed -e '/extern int efi_set_verbose/d' -i src/efibootmgr.c
+
+make -j$BUILD_JOBS $MAKE_FLAGS EFIDIR=LFS EFI_LOADER=grubx64.efi
+make -j$BUILD_JOBS $MAKE_FLAGS install EFIDIR=LFS
+
+EOF
+
+install_package grub-2.02.tar.xz << EOF
+
+# Patch grub EFI bug not mentioned in the LFS book.
+# https://wiki.linuxfromscratch.org/lfs/ticket/4354
+sed -i '/R_X86_64_PC32:/a case R_X86_64_PLT32:' util/grub-mkimagexx.c
+sed -i '/R_X86_64_PC32,/a R_X86_64_PLT32,'      util/grub-module-verifier.c
+
+./configure --prefix=/usr \
+--sbindir=/sbin \
+--sysconfdir=/etc \
+--disable-efiemu \
+--disable-werror \
+--with-platform=efi # GRUB with EFI support
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /etc/bash_completion.d/grub /usr/share/bash-completion/completions
+
+EOF
+
+install_package less-530.tar.gz << EOF
+
+./configure --prefix=/usr --sysconfdir=/etc
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package gzip-1.10.tar.xz << EOF
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/bin/gzip /bin
+
+EOF
+
+install_package iproute2-4.20.0.tar.xz << EOF
+
+sed -i /ARPD/d Makefile
+rm -fv man/man8/arpd.8
+
+sed -i 's/.m_ipt.o//' tc/Makefile
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS DOCDIR=/usr/share/doc/iproute2-4.20.0 install
+
+EOF
+
+install_package kbd-2.0.4.tar.xz << EOF
+
+patch -Np1 -i $SRC_DIR/kbd-2.0.4-backspace-1.patch
+
+sed -i 's/\(RESIZECONS_PROGS=\)yes/\1no/g' configure
+sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
+
+PKG_CONFIG_PATH=/tools/lib/pkgconfig ./configure --prefix=/usr --disable-vlock
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mkdir -v /usr/share/doc/kbd-2.0.4
+cp -R -v docs/doc/* /usr/share/doc/kbd-2.0.4
+
+EOF
+
+install_package libpipeline-1.5.1.tar.gz << EOF
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package make-4.2.1.tar.bz2 << EOF
+
+sed -i '211,217 d; 219,229 d; 232 d' glob/glob.c
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package patch-2.7.6.tar.xz << EOF
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package man-db-2.8.5.tar.xz << EOF
+
+./configure --prefix=/usr                        \
+            --docdir=/usr/share/doc/man-db-2.8.5 \
+            --sysconfdir=/etc                    \
+            --disable-setuid                     \
+            --enable-cache-owner=bin             \
+            --with-browser=/usr/bin/lynx         \
+            --with-vgrind=/usr/bin/vgrind        \
+            --with-grap=/usr/bin/grap
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package tar-1.31.tar.xz << EOF
+
+sed -i 's/abort.*/FALLTHROUGH;/' src/extract.c
+
+FORCE_UNSAFE_CONFIGURE=1  \
+./configure --prefix=/usr \
+            --bindir=/bin
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+make -C doc install-html docdir=/usr/share/doc/tar-1.31
+
+EOF
+
+install_package texinfo-6.5.tar.xz << EOF
+
+sed -i '5481,5485 s/({/(\\{/' tp/Texinfo/Parser.pm
+
+./configure --prefix=/usr --disable-static
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+make -j$BUILD_JOBS $MAKE_FLAGS TEXMF=/usr/share/texmf install-tex
+
+pushd /usr/share/info
+rm -v dir
+for f in *
+  do install-info \$f dir 2>/dev/null
+done
+popd
+
+EOF
+
+install_package vim-8.1.tar.bz2 << EOF
+
+echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+ln -sv vim /usr/bin/vi
+for L in  /usr/share/man/{,*/}man1/vim.1; do
+    ln -sv vim.1 \$(dirname \$L)/vi.1
+done
+
+ln -sv ../vim/vim81/doc /usr/share/doc/vim-8.1
+
+export VIMRUNTIME=/usr/share/vim/vim81/
+
+cat > /etc/vimrc << "LFS_EOF"
+" Begin /etc/vimrc
+
+" Ensure defaults are set before customizing settings, not after
+source \$VIMRUNTIME/defaults.vim
+let skip_defaults_vim=1 
+
+set nocompatible
+set backspace=2
+set mouse=
+" set spelllang=en,th
+" set spell
+syntax on
+
+if (&term == "xterm") || (&term == "putty")
+  set background=dark
+endif
+
+" End /etc/vimrc
+LFS_EOF
+
+unset VIMRUNTIME
+
+EOF
+
+install_package systemd-240.tar.gz << EOF
+
+patch -Np1 -i $SRC_DIR/systemd-240-security_fixes-2.patch
+
+ln -sf /tools/bin/true /usr/bin/xsltproc
+
+for file in /tools/lib/lib{blkid,mount,uuid}*; do
+    ln -sf \$file /usr/lib/
+done
+
+tar -xf $SRC_DIR/systemd-man-pages-240.tar.xz
+
+sed '177,$ d' -i src/resolve/meson.build
+
+sed -i 's/GROUP="render", //' rules/50-udev-default.rules.in
+
+mkdir -p build
+cd       build
+
+PKG_CONFIG_PATH="/usr/lib/pkgconfig:/tools/lib/pkgconfig" \
+LANG=en_US.UTF-8                   \
+meson --prefix=/usr                \
+      --sysconfdir=/etc            \
+      --localstatedir=/var         \
+      -Dblkid=true                 \
+      -Dbuildtype=release          \
+      -Ddefault-dnssec=no          \
+      -Dfirstboot=false            \
+      -Dinstall-tests=false        \
+      -Dkill-path=/bin/kill        \
+      -Dkmod-path=/bin/kmod        \
+      -Dldconfig=false             \
+      -Dmount-path=/bin/mount      \
+      -Drootprefix=                \
+      -Drootlibdir=/lib            \
+      -Dsplit-usr=true             \
+      -Dsulogin-path=/sbin/sulogin \
+      -Dsysusers=false             \
+      -Dumount-path=/bin/umount    \
+      -Db_lto=false                \
+      ..
+
+NINJAJOBS=$BUILD_JOBS LANG=en_US.UTF-8 ninja
+NINJAJOBS=$BUILD_JOBS LANG=en_US.UTF-8 ninja install
+
+rm -rfv /usr/lib/rpm
+rm -f /usr/bin/xsltproc
+
+systemd-machine-id-setup
+
+cat > /lib/systemd/systemd-user-sessions << "LFS_EOF"
+#!/bin/bash
+rm -f /run/nologin
+LFS_EOF
+
+chmod 755 /lib/systemd/systemd-user-sessions
+
+EOF
+
+install_package dbus-1.12.12.tar.gz << EOF
+
+./configure --prefix=/usr                       \
+            --sysconfdir=/etc                   \
+            --localstatedir=/var                \
+            --disable-static                    \
+            --disable-doxygen-docs              \
+            --disable-xml-docs                  \
+            --docdir=/usr/share/doc/dbus-1.12.12 \
+            --with-console-auth-dir=/run/console \
+            --enable-systemd
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/lib/libdbus-1.so.* /lib
+ln -sfv ../../lib/\$(readlink /usr/lib/libdbus-1.so) /usr/lib/libdbus-1.so
+
+ln -sfv /etc/machine-id /var/lib/dbus
+
+EOF
+
+install_package procps-ng-3.3.15.tar.xz << EOF
+
+./configure --prefix=/usr                            \
+            --exec-prefix=                           \
+            --libdir=/usr/lib                        \
+            --docdir=/usr/share/doc/procps-ng-3.3.15 \
+            --disable-static                         \
+            --disable-kill                           \
+            --with-systemd
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/lib/libprocps.so.* /lib
+ln -sfv ../../lib/\$(readlink /usr/lib/libprocps.so) /usr/lib/libprocps.so
+
+EOF
+
+install_package util-linux-2.33.1.tar.xz << EOF
+
+mkdir -pv /var/lib/hwclock
+
+rm -vf /usr/include/{blkid,libmount,uuid}
+
+./configure ADJTIME_PATH=/var/lib/hwclock/adjtime   \
+            --docdir=/usr/share/doc/util-linux-2.33.1 \
+            --disable-chfn-chsh  \
+            --disable-login      \
+            --disable-nologin    \
+            --disable-su         \
+            --disable-setpriv    \
+            --disable-runuser    \
+            --disable-pylibmount \
+            --disable-static     \
+            --without-python
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package e2fsprogs-1.44.5.tar.gz << EOF
+
+mkdir -v build
+cd build
+
+../configure --prefix=/usr           \
+             --bindir=/bin           \
+             --with-root-prefix=""   \
+             --enable-elf-shlibs     \
+             --disable-libblkid      \
+             --disable-libuuid       \
+             --disable-uuidd         \
+             --disable-fsck
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+make -j$BUILD_JOBS $MAKE_FLAGS install-libs
+
+chmod -v u+w /usr/lib/{libcom_err,libe2p,libext2fs,libss}.a
+
+gunzip -v /usr/share/info/libext2fs.info.gz
+install-info --dir-file=/usr/share/info/dir /usr/share/info/libext2fs.info
+
+# Documentations for file system project :)
+makeinfo -o      doc/com_err.info ../lib/et/com_err.texinfo
+install -v -m644 doc/com_err.info /usr/share/info
+install-info --dir-file=/usr/share/info/dir /usr/share/info/com_err.info
+
+EOF
+
+rm -f /usr/lib/lib{bfd,opcodes}.a
+rm -f /usr/lib/libbz2.a
+rm -f /usr/lib/lib{com_err,e2p,ext2fs,ss}.a
+rm -f /usr/lib/libltdl.a
+rm -f /usr/lib/libfl.a
+rm -f /usr/lib/libz.a
+
+find /usr/lib /usr/libexec -name \*.la -delete
+

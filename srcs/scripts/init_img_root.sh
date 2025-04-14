@@ -39,16 +39,16 @@ EOF
 sleep 1
 
 # Format EFI partition (vfat)
-mkfs.vfat -F32 /dev/nbd0p1
+mkfs.vfat -F32 /dev/nbd0p1 -l LFS_EFI
 
 # Format /boot partition
-mkfs.ext4 -F /dev/nbd0p2
+mkfs.ext4 -F /dev/nbd0p2 -l LFS_BOOT
 
 # Initialize swap
-mkswap /dev/nbd0p3
+mkswap /dev/nbd0p3 -l LFS_SWAP
 
 # Format root (/) partition
-mkfs.ext4 -F /dev/nbd0p4
+mkfs.ext4 -F /dev/nbd0p4 -l LFS_ROOT
 
 else
     qemu-nbd -c ${LFS_LOOP} ./${LFS_IMG};

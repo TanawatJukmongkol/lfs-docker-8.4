@@ -15,4 +15,9 @@ mkdir /boot
 mount /dev/sda2 /boot
 mkdir /boot/efi
 mount /dev/sda1 /boot/efi
+label /dev/sda1 LFS_EFI
+label /dev/sda2 LFS_BOOT
+label /dev/sda4 LFS_ROOT
+label /dev/sda3 LFS_SWAP
 EOF
+
