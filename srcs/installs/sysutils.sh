@@ -161,6 +161,18 @@ make install
 
 EOF
 
+install_package diffutils-3.7.tar.xz << EOF
+
+./configure --prefix=/tools
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+
+# make check
+
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
 install_package file-5.36.tar.gz << EOF
 
 ./configure --prefix=/tools

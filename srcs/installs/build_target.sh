@@ -26,7 +26,7 @@ EOF
 
 install_package glibc-2.29.tar.xz << EOF
 
-patch -Np1 -i ../glibc-2.29-fhs-1.patch
+patch -Np1 -i $SRC_DIR/glibc-2.29-fhs-1.patch
 
 ln -sfv /tools/lib/gcc /usr/lib
 
@@ -46,10 +46,10 @@ mkdir -v build
 cd       build
 
 CC="gcc -isystem \$GCC_INCDIR -isystem /usr/include" \
-../configure --prefix=/usr                          \
-             --disable-werror                       \
-             --enable-kernel=3.2                    \
-             --enable-stack-protector=strong        \
+../configure --prefix=/usr                           \
+             --disable-werror                        \
+             --enable-kernel=3.2                     \
+             --enable-stack-protector=strong         \
              libc_cv_slibdir=/lib
 unset GCC_INCDIR
 
@@ -76,31 +76,31 @@ install -v -Dm644 ../nscd/nscd.service /lib/systemd/system/nscd.service
 
 mkdir -pv /usr/lib/locale
 localedef -i POSIX -f UTF-8 C.UTF-8 2> /dev/null || true
-# localedef -i cs_CZ -f UTF-8 cs_CZ.UTF-8
-# localedef -i de_DE -f ISO-8859-1 de_DE
-# localedef -i de_DE@euro -f ISO-8859-15 de_DE@euro
-# localedef -i de_DE -f UTF-8 de_DE.UTF-8
-# localedef -i el_GR -f ISO-8859-7 el_GR
-# localedef -i en_GB -f UTF-8 en_GB.UTF-8
-# localedef -i en_HK -f ISO-8859-1 en_HK
-# localedef -i en_PH -f ISO-8859-1 en_PH
+localedef -i cs_CZ -f UTF-8 cs_CZ.UTF-8
+localedef -i de_DE -f ISO-8859-1 de_DE
+localedef -i de_DE@euro -f ISO-8859-15 de_DE@euro
+localedef -i de_DE -f UTF-8 de_DE.UTF-8
+localedef -i el_GR -f ISO-8859-7 el_GR
+localedef -i en_GB -f UTF-8 en_GB.UTF-8
+localedef -i en_HK -f ISO-8859-1 en_HK
+localedef -i en_PH -f ISO-8859-1 en_PH
 localedef -i en_US -f ISO-8859-1 en_US
 localedef -i en_US -f UTF-8 en_US.UTF-8
-# localedef -i es_MX -f ISO-8859-1 es_MX
-# localedef -i fa_IR -f UTF-8 fa_IR
-# localedef -i fr_FR -f ISO-8859-1 fr_FR
-# localedef -i fr_FR@euro -f ISO-8859-15 fr_FR@euro
-# localedef -i fr_FR -f UTF-8 fr_FR.UTF-8
-# localedef -i it_IT -f ISO-8859-1 it_IT
-# localedef -i it_IT -f UTF-8 it_IT.UTF-8
-# localedef -i ja_JP -f EUC-JP ja_JP
-# localedef -i ja_JP -f SHIFT_JIS ja_JP.SIJS 2> /dev/null || true
-# localedef -i ja_JP -f UTF-8 ja_JP.UTF-8
-# localedef -i ru_RU -f KOI8-R ru_RU.KOI8-R
-# localedef -i ru_RU -f UTF-8 ru_RU.UTF-8
-# localedef -i tr_TR -f UTF-8 tr_TR.UTF-8
-# localedef -i zh_CN -f GB18030 zh_CN.GB18030
-# localedef -i zh_HK -f BIG5-HKSCS zh_HK.BIG5-HKSCS
+localedef -i es_MX -f ISO-8859-1 es_MX
+localedef -i fa_IR -f UTF-8 fa_IR
+localedef -i fr_FR -f ISO-8859-1 fr_FR
+localedef -i fr_FR@euro -f ISO-8859-15 fr_FR@euro
+localedef -i fr_FR -f UTF-8 fr_FR.UTF-8
+localedef -i it_IT -f ISO-8859-1 it_IT
+localedef -i it_IT -f UTF-8 it_IT.UTF-8
+localedef -i ja_JP -f EUC-JP ja_JP
+localedef -i ja_JP -f SHIFT_JIS ja_JP.SIJS 2> /dev/null || true
+localedef -i ja_JP -f UTF-8 ja_JP.UTF-8
+localedef -i ru_RU -f KOI8-R ru_RU.KOI8-R
+localedef -i ru_RU -f UTF-8 ru_RU.UTF-8
+localedef -i tr_TR -f UTF-8 tr_TR.UTF-8
+localedef -i zh_CN -f GB18030 zh_CN.GB18030
+localedef -i zh_HK -f BIG5-HKSCS zh_HK.BIG5-HKSCS
 
 make -j$BUILD_JOBS $MAKE_FLAGS localedata/install-locales
 
@@ -171,6 +171,7 @@ gcc -dumpspecs | sed -e 's@/tools@@g'                   \
     -e '/\*cpp:/{n;s@$@ -isystem /usr/include@}' >      \
     `dirname $(gcc --print-libgcc-file-name)`/specs
 ./configure --prefix=/usr
+
 fi
 
 # Tests can be found here https://www.linuxfromscratch.org/museum/lfs-museum/8.4-systemd/LFS-BOOK-8.4-systemd-HTML/chapter06/adjusting.html
@@ -354,11 +355,6 @@ EOF
 
 # If you want, install cracklib here
 
-wget_list << EOF
-https://ftp2.osuosl.org/pub/blfs/conglomeration/Linux-PAM/Linux-PAM-1.3.0.tar.bz2
-https://ftp2.osuosl.org/pub/blfs/conglomeration/Linux-PAM/Linux-PAM-1.2.0-docs.tar.bz2
-EOF
-
 install_package Linux-PAM-1.3.0.tar.bz2 << EOF
 
 tar -xf /sources/Linux-PAM-1.2.0-docs.tar.bz2 --strip-components=1
@@ -520,6 +516,7 @@ esac
 
 rm -f /usr/lib/gcc
 
+rm -rf   build
 mkdir -v build
 cd       build
 
@@ -534,13 +531,9 @@ SED=sed                               \
 make -j$BUILD_JOBS $MAKE_FLAGS
 
 # ulimit -s 32768
-
 # rm ../gcc/testsuite/g++.dg/pr83239.C
-
 # chown -Rv nobody .
-
-# su nobody -s /bin/bash -c "PATH=$PATH make -k check"
-
+# su nobody -s /bin/bash -c "PATH=\$PATH make -k check"
 # ../contrib/test_summary | grep -A7 Summ
 
 make -j$BUILD_JOBS $MAKE_FLAGS install
@@ -557,6 +550,568 @@ ln -sfv ../../libexec/gcc/\$(gcc -dumpmachine)/8.2.0/liblto_plugin.so \
 
 mkdir -pv /usr/share/gdb/auto-load/usr/lib
 mv -v /usr/lib/*gdb.py /usr/share/gdb/auto-load/usr/lib
+
+EOF
+
+install_package bzip2-1.0.6.tar.gz << EOF
+
+patch -Np1 -i $BUILD_DIR/bzip2-1.0.6-install_docs-1.patch
+
+sed -i 's@\(ln -s -f \)\$(PREFIX)/bin/@\1@' Makefile
+
+sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+
+make -f Makefile-libbz2_so
+make clean
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS PREFIX=/usr install
+
+cp -v bzip2-shared /bin/bzip2
+cp -av libbz2.so* /lib
+ln -sv ../../lib/libbz2.so.1.0 /usr/lib/libbz2.so
+rm -v /usr/bin/{bunzip2,bzcat,bzip2}
+ln -sv bzip2 /bin/bunzip2
+ln -sv bzip2 /bin/bzcat
+
+EOF
+
+install_package pkg-config-0.29.2.tar.gz << EOF
+
+./configure --prefix=/usr              \
+            --with-internal-glib       \
+            --disable-host-tool        \
+            --docdir=/usr/share/doc/pkg-config-0.29.2
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package ncurses-6.1.tar.gz << EOF
+
+sed -i '/LIBTOOL_INSTALL/d' c++/Makefile.in
+
+./configure --prefix=/usr           \
+            --mandir=/usr/share/man \
+            --with-shared           \
+            --without-debug         \
+            --without-normal        \
+            --enable-pc-files       \
+            --enable-widec
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/lib/libncursesw.so.6* /lib
+
+ln -sfv ../../lib/\$(readlink /usr/lib/libncursesw.so) /usr/lib/libncursesw.so
+
+for lib in ncurses form panel menu ; do
+    rm -vf                    /usr/lib/lib\${lib}.so
+    echo "INPUT(-l\${lib}w)" > /usr/lib/lib\${lib}.so
+    ln -sfv \${lib}w.pc        /usr/lib/pkgconfig/\${lib}.pc
+done
+
+rm -vf                     /usr/lib/libcursesw.so
+echo "INPUT(-lncursesw)" > /usr/lib/libcursesw.so
+ln -sfv libncurses.so      /usr/lib/libcurses.so
+
+mkdir -v       /usr/share/doc/ncurses-6.1
+cp -v -R doc/* /usr/share/doc/ncurses-6.1
+
+make distclean
+./configure --prefix=/usr    \
+            --with-shared    \
+            --without-normal \
+            --without-debug  \
+            --without-cxx-binding \
+            --with-abi-version=5
+
+make -j$BUILD_JOBS $MAKE_FLAGS sources libs
+cp -av lib/lib*.so.5* /usr/lib
+
+EOF
+
+install_package attr-2.4.48.tar.gz << EOF
+
+./configure --prefix=/usr     \
+            --disable-static  \
+            --sysconfdir=/etc \
+            --docdir=/usr/share/doc/attr-2.4.48
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/lib/libattr.so.* /lib
+ln -sfv ../../lib/\$(readlink /usr/lib/libattr.so) /usr/lib/libattr.so
+
+EOF
+
+install_package acl-2.2.53.tar.gz << EOF
+
+./configure --prefix=/usr         \
+            --disable-static      \
+            --libexecdir=/usr/lib \
+            --docdir=/usr/share/doc/acl-2.2.53
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/lib/libacl.so.* /lib
+ln -sfv ../../lib/\$(readlink /usr/lib/libacl.so) /usr/lib/libacl.so
+
+EOF
+
+install_package libcap-2.26.tar.xz << EOF
+
+sed -i '/install.*STALIBNAME/d' libcap/Makefile
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+
+make -j$BUILD_JOBS $MAKE_FLAGS RAISE_SETFCAP=no lib=lib prefix=/usr install
+chmod -v 755 /usr/lib/libcap.so.2.26
+
+mv -v /usr/lib/libcap.so.* /lib
+ln -sfv ../../lib/\$(readlink /usr/lib/libcap.so) /usr/lib/libcap.so
+
+EOF
+
+install_package sed-4.7.tar.xz << EOF
+
+sed -i 's/usr/tools/'                 build-aux/help2man
+sed -i 's/testsuite.panic-tests.sh//' Makefile.in
+
+./configure --prefix=/usr --bindir=/bin
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS html
+
+make -j$BUILD_JOBS $MAKE_FLAGS install
+install -d -m755           /usr/share/doc/sed-4.7
+install -m644 doc/sed.html /usr/share/doc/sed-4.7
+
+EOF
+
+install_package psmisc-23.2.tar.xz << EOF
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/bin/fuser   /bin
+mv -v /usr/bin/killall /bin
+
+EOF
+
+install_package iana-etc-2.30.tar.bz2 << EOF
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package bison-3.3.2.tar.xz << EOF
+
+./configure --prefix=/usr --docdir=/usr/share/doc/bison-3.3.2
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package flex-2.6.4.tar.gz << EOF
+
+sed -i "/math.h/a #include <malloc.h>" src/flexdef.h
+
+HELP2MAN=/tools/bin/true \
+./configure --prefix=/usr --docdir=/usr/share/doc/flex-2.6.4
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+ln -sv flex /usr/bin/lex
+
+EOF
+
+install_package grep-3.3.tar.xz << EOF
+
+./configure --prefix=/usr --bindir=/bin
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package bash-5.0.tar.gz << EOF
+
+./configure --prefix=/usr                    \
+            --docdir=/usr/share/doc/bash-5.0 \
+            --without-bash-malloc            \
+            --with-installed-readline
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+mv -vf /usr/bin/bash /bin
+
+EOF
+
+# exec /bin/bash --login +h
+
+install_package libtool-2.4.6.tar.xz << EOF
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package gdbm-1.18.1.tar.gz << EOF
+
+./configure --prefix=/usr    \
+            --disable-static \
+            --enable-libgdbm-compat
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package gperf-3.1.tar.gz << EOF
+
+./configure --prefix=/usr --docdir=/usr/share/doc/gperf-3.1
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package expat-2.2.6.tar.bz2 << EOF
+
+sed -i 's|usr/bin/env |bin/|' run.sh.in
+
+./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/expat-2.2.6
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+install -v -m644 doc/*.{html,png,css} /usr/share/doc/expat-2.2.6
+
+EOF
+
+install_package inetutils-1.9.4.tar.xz << EOF
+
+./configure --prefix=/usr        \
+            --localstatedir=/var \
+            --disable-logger     \
+            --disable-whois      \
+            --disable-rcp        \
+            --disable-rexec      \
+            --disable-rlogin     \
+            --disable-rsh        \
+            --disable-servers
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/bin/{hostname,ping,ping6,traceroute} /bin
+mv -v /usr/bin/ifconfig /sbin
+
+EOF
+
+install_package perl-5.28.1.tar.xz << EOF
+
+echo "127.0.0.1 localhost \$(hostname)" > /etc/hosts
+
+export BUILD_ZLIB=False
+export BUILD_BZIP2=0
+
+sh Configure -des -Dprefix=/usr                 \
+                  -Dvendorprefix=/usr           \
+                  -Dman1dir=/usr/share/man/man1 \
+                  -Dman3dir=/usr/share/man/man3 \
+                  -Dpager="/usr/bin/less -isR"  \
+                  -Duseshrplib                  \
+                  -Dusethreads
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+unset BUILD_ZLIB BUILD_BZIP2
+
+EOF
+
+install_package XML-Parser-2.44.tar.gz << EOF
+
+perl Makefile.PL
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package intltool-0.51.0.tar.gz << EOF
+
+sed -i 's:\\\${:\\\$\\{:' intltool-update.in
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+install -v -Dm644 doc/I18N-HOWTO /usr/share/doc/intltool-0.51.0/I18N-HOWTO
+
+EOF
+
+install_package autoconf-2.69.tar.xz << EOF
+
+sed '361 s/{/\\{/' -i bin/autoscan.in
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package automake-1.16.1.tar.xz << EOF
+
+./configure --prefix=/usr --docdir=/usr/share/doc/automake-1.16.1
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package xz-5.2.4.tar.xz << EOF
+
+./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/xz-5.2.4
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v   /usr/bin/{lzma,unlzma,lzcat,xz,unxz,xzcat} /bin
+mv -v /usr/lib/liblzma.so.* /lib
+ln -svf ../../lib/\$(readlink /usr/lib/liblzma.so) /usr/lib/liblzma.so
+
+EOF
+
+install_package kmod-26.tar.xz << EOF
+
+./configure --prefix=/usr          \
+            --bindir=/bin          \
+            --sysconfdir=/etc      \
+            --with-rootlibdir=/lib \
+            --with-xz              \
+            --with-zlib
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+for target in depmod insmod lsmod modinfo modprobe rmmod; do
+  ln -sfv ../bin/kmod /sbin/\$target
+done
+
+ln -sfv kmod /bin/lsmod
+
+EOF
+
+install_package gettext-0.19.8.1.tar.xz << EOF
+
+sed -i '/^TESTS =/d' gettext-runtime/tests/Makefile.in &&
+sed -i 's/test-lock..EXEEXT.//' gettext-tools/gnulib-tests/Makefile.in
+
+sed -e '/AppData/{N;N;p;s/\.appdata\./.metainfo./}' \
+    -i gettext-tools/its/appdata.loc
+
+./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/gettext-0.19.8.1
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+chmod -v 0755 /usr/lib/preloadable_libintl.so
+
+EOF
+
+install_package elfutils-0.176.tar.bz2 << EOF
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS -C libelf install
+
+install -vm644 config/libelf.pc /usr/lib/pkgconfig
+
+EOF
+
+install_package libffi-3.2.1.tar.gz << EOF
+
+sed -e '/^includesdir/ s/\$(libdir).*$/\$(includedir)/' \
+    -i include/Makefile.in
+
+sed -e '/^includedir/ s/=.*$/=@includedir@/' \
+    -e 's/^Cflags: -I\${includedir}/Cflags:/' \
+    -i libffi.pc.in
+
+# I hope that this is correct... (blame the docs if it's not lol)
+
+# Select optimization
+# export EXTRA_CONFIG_FLAGS="--with-gcc-arch=$LFS_ARCH" # Generic
+export EXTRA_CONFIG_FLAGS="--with-gcc-arch=native" # Optimize for current hardware
+
+# export CFLAGS="-march=$LFS_ARCH"
+# export CXXFLAGS="-march=$LFS_ARCH"
+
+echo "EXTRA_CONFIG_FLAGS:  Install with '\$EXTRA_CONFIG_FLAGS' flags"
+echo "CC:  Install with '\$CFLAGS' flags"
+echo "CXX: Install with '\$CXXFLAGS' flags"
+
+./configure --prefix=/usr --disable-static \$EXTRA_CONFIG_FLAGS
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+
+# make -j$BUILD_JOBS $MAKE_FLAGS check
+
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+unset EXTRA_CONFIG_FLAGS CFLAGS CXXFLAGS
+
+EOF
+
+install_package openssl-1.1.1a.tar.gz << EOF
+
+./config --prefix=/usr         \
+         --openssldir=/etc/ssl \
+         --libdir=lib          \
+         shared                \
+         zlib-dynamic
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+
+sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+make -j$BUILD_JOBS $MAKE_FLAGS MANSUFFIX=ssl install
+
+mv -v /usr/share/doc/openssl /usr/share/doc/openssl-1.1.1a
+cp -vfr doc/* /usr/share/doc/openssl-1.1.1a
+
+EOF
+
+install_package Python-3.7.2.tar.xz << EOF
+
+./configure --prefix=/usr       \
+            --enable-shared     \
+            --with-system-expat \
+            --with-system-ffi   \
+            --with-ensurepip=yes
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+chmod -v 755 /usr/lib/libpython3.7m.so
+chmod -v 755 /usr/lib/libpython3.so
+
+install -v -dm755 /usr/share/doc/python-3.7.2/html
+
+tar --strip-components=1  \
+    --no-same-owner       \
+    --no-same-permissions \
+    -C /usr/share/doc/python-3.7.2/html \
+    -xvf $SRC_DIR/python-3.7.2-docs-html.tar.bz2
+
+EOF
+
+install_package ninja-1.9.0.tar.gz << EOF
+
+# Enable the use of "export NINJAJOBS=4"
+
+sed -i '/int Guess/a \
+  int   j = 0;\
+  char* jobs = getenv( "NINJAJOBS" );\
+  if ( jobs != NULL ) j = atoi( jobs );\
+  if ( j > 0 ) return j;\
+' src/ninja.cc
+
+python3 configure.py --bootstrap
+
+install -vm755 ninja /usr/bin/
+install -vDm644 misc/bash-completion /usr/share/bash-completion/completions/ninja
+install -vDm644 misc/zsh-completion  /usr/share/zsh/site-functions/_ninja
+
+EOF
+
+install_package meson-0.49.2.tar.gz << EOF
+
+python3 setup.py build
+python3 setup.py install --root=dest
+cp -rv dest/* /
+
+EOF
+
+install_package coreutils-8.30.tar.xz << EOF
+
+patch -Np1 -i $SRC_DIR/coreutils-8.30-i18n-1.patch
+
+sed -i '/test.lock/s/^/#/' gnulib-tests/gnulib.mk
+
+autoreconf -fiv
+FORCE_UNSAFE_CONFIGURE=1 ./configure \
+            --prefix=/usr            \
+            --enable-no-install-program=kill,uptime
+
+FORCE_UNSAFE_CONFIGURE=1 make -j$BUILD_JOBS $MAKE_FLAGS
+
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mv -v /usr/bin/{cat,chgrp,chmod,chown,cp,date,dd,df,echo} /bin
+mv -v /usr/bin/{false,ln,ls,mkdir,mknod,mv,pwd,rm} /bin
+mv -v /usr/bin/{rmdir,stty,sync,true,uname} /bin
+mv -v /usr/bin/chroot /usr/sbin
+mv -v /usr/share/man/man1/chroot.1 /usr/share/man/man8/chroot.8
+sed -i s/\"1\"/\"8\"/1 /usr/share/man/man8/chroot.8
+
+mv -v /usr/bin/{head,nice,sleep,touch} /bin
+
+EOF
+
+install_package check-0.12.0.tar.gz << EOF
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+sed -i '1 s/tools/usr/' /usr/bin/checkmk
+
+EOF
+
+install_package diffutils-3.7.tar.xz << EOF
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package gawk-4.2.1.tar.xz << EOF
+
+sed -i 's/extras//' Makefile.in
+
+./configure --prefix=/usr
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+mkdir -v /usr/share/doc/gawk-4.2.1
+cp    -v doc/{awkforai.txt,*.{eps,pdf,jpg}} /usr/share/doc/gawk-4.2.1
 
 EOF
 

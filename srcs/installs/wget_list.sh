@@ -95,5 +95,7 @@ https://repository.timesys.com/buildsources/p/psmisc/psmisc-23.2/psmisc-23.2.tar
 https://ftp.osuosl.org/pub/lfs/lfs-packages/8.3/lfs-bootscripts-20180820.tar.bz2
 https://ftp.osuosl.org/pub/lfs/lfs-packages/8.3/man-pages-4.16.tar.xz
 https://ftp.osuosl.org/pub/lfs/lfs-packages/8.3/zlib-1.2.11.tar.xz
+https://ftp2.osuosl.org/pub/blfs/conglomeration/Linux-PAM/Linux-PAM-1.3.0.tar.bz2
+https://ftp2.osuosl.org/pub/blfs/conglomeration/Linux-PAM/Linux-PAM-1.2.0-docs.tar.bz2
 EOF
 

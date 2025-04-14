@@ -28,4 +28,5 @@ sudo chroot "$LFS" /tools/bin/env -i \
     TERM="$TERM"                \
     PS1='(lfs chroot) \u:\w\$ ' \
     PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin \
+	LFS_ARCH=$LFS_ARCH \
     /tools/bin/bash --login +h
