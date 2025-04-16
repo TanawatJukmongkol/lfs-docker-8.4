@@ -79,7 +79,6 @@ https://github.com/shadow-maint/shadow/releases/download/4.6/shadow-4.6.tar.xz
 http://www.infodrom.org/projects/sysklogd/download/sysklogd-1.5.1.tar.gz
 https://github.com/systemd/systemd/archive/v240/systemd-240.tar.gz
 http://anduin.linuxfromscratch.org/LFS/systemd-man-pages-240.tar.xz
-http://download.savannah.gnu.org/releases/sysvinit/sysvinit-2.93.tar.xz
 https://www.iana.org/time-zones/repository/releases/tzdata2018i.tar.gz
 http://anduin.linuxfromscratch.org/LFS/udev-lfs-20171102.tar.bz2
 https://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-Parser-2.44.tar.gz
@@ -87,7 +86,6 @@ http://www.linuxfromscratch.org/patches/lfs/8.4/bzip2-1.0.6-install_docs-1.patch
 http://www.linuxfromscratch.org/patches/lfs/8.4/coreutils-8.30-i18n-1.patch
 http://www.linuxfromscratch.org/patches/lfs/8.4/glibc-2.29-fhs-1.patch
 http://www.linuxfromscratch.org/patches/lfs/8.4/kbd-2.0.4-backspace-1.patch
-http://www.linuxfromscratch.org/patches/lfs/8.4/sysvinit-2.93-consolidated-1.patch
 http://www.linuxfromscratch.org/patches/lfs/8.4/systemd-240-security_fixes-2.patch
 https://ftp2.osuosl.org/pub/blfs/conglomeration/vim/vim-8.1.tar.bz2
 https://toolchains.bootlin.com/downloads/releases/sources/expat-2.2.6/expat-2.2.6.tar.bz2
@@ -101,5 +99,10 @@ https://github.com/rhboot/efibootmgr/archive/17/efibootmgr-17.tar.gz
 https://github.com/rhboot/efivar/releases/download/37/efivar-37.tar.bz2
 https://www.linuxfromscratch.org/patches/blfs/11.0/efivar-37-gcc_9-1.patch
 ftp://ftp.rpm.org/pub/rpm/popt/releases/popt-1.x/popt-1.18.tar.gz
+https://ftp.gnu.org/gnu/wget/wget-1.20.1.tar.gz
+http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-7.9p1.tar.gz
+https://www.linuxfromscratch.org/patches/downloads/openssh/openssh-7.9p1-security_fix-1.patch
+https://ftp2.osuosl.org/pub/blfs/conglomeration/blfs-systemd-units/blfs-systemd-units-20180105.tar.bz2
+https://github.com/dosfstools/dosfstools/releases/download/v4.1/dosfstools-4.1.tar.xz
+https://invisible-mirror.net/archives/lynx/tarballs/lynx2.8.9rel.1.tar.bz2
 EOF
-

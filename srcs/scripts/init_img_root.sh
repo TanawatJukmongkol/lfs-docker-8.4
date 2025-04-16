@@ -1,56 +1,76 @@
 
 # Generate disk image
 if [ ! -f "./$LFS_IMG" ]; then
-    mkdir -p ./$LFS_BUILD
-    echo "> Creating qcow2 disk image..."
-    pwd
-    qemu-img create -f qcow2 "./$LFS_IMG" 25G
-	qemu-nbd -c ${LFS_LOOP} ./${LFS_IMG};
-	sleep 1
-    echo "> Partitioning..."
-fdisk $LFS_LOOP << EOF
-g
-n
-1
-2048
-1050624
-t
-1
-n
-2
-1050625
-2099201
-n
-3
-2099202
-6293506
-t
-3
-19
-n
-4
-6293507
--2048
-w
 
-EOF
+BUILD=./${LFS_BUILD}
+IMG_DIR="${BUILD}/dist"
+IMG_TYPE="qcow2"
+IMG_PATH="${IMG_DIR}/lfs.${IMG_TYPE}"
+IMG_SIZE="25G"
 
+if [ -z "${BUILD}" ]; then
+	echo '$BUILD is empty.'
+	exit 1
+fi
 
+mkdir -p "${IMG_DIR}"
+
+# Create disk image if not present
+if [ ! -e "${IMG_PATH}" ]; then
+	echo "Creating the disk image..."
+	qemu-img create -f ${IMG_TYPE} ${IMG_PATH} ${IMG_SIZE}
+else
+	echo "Image already exists. Skipping creation."
+fi
+
+# Connect NBD
+if [ ! -e "${LFS_LOOP}" ]; then
+	modprobe nbd max_part=16
+fi
+
+echo "Attaching image to NBD..."
+qemu-nbd -d ${LFS_LOOP}
+qemu-nbd -c ${LFS_LOOP} ${IMG_PATH}
 sleep 1
 
-# Format EFI partition (vfat)
-mkfs.vfat -F32 /dev/nbd0p1 -l LFS_EFI
+# Use sfdisk for GPT partitioning
+echo "Partitioning with sfdisk..."
+sfdisk --label gpt ${LFS_LOOP} <<EOF
+label: gpt
+unit: sectors
 
-# Format /boot partition
-mkfs.ext4 -F /dev/nbd0p2 -l LFS_BOOT
+${LFS_LOOP}p1 :   start=2048, size=1228800, type=uefi
+${LFS_LOOP}p2 : size=1228800, type=linux
+${LFS_LOOP}p3 : size=4194304, type=swap
+${LFS_LOOP}p4 : type=linux
+EOF
 
-# Initialize swap
-mkswap /dev/nbd0p3 -l LFS_SWAP
+# Filesystems
+echo "Creating filesystems..."
+mkfs.vfat -n LFS_EFI  ${LFS_LOOP}p1
+mkfs.ext4 -L LFS_BOOT ${LFS_LOOP}p2
+mkswap    -L LFS_SWAP ${LFS_LOOP}p3
+mkfs.ext4 -L LFS_ROOT ${LFS_LOOP}p4
+sleep 1
 
-# Format root (/) partition
-mkfs.ext4 -F /dev/nbd0p4 -l LFS_ROOT
+# echo "Detaching NBD..."
+# qemu-nbd -d ${IMG_LOOPBACK_DISK}
+# rmmod nbd
+
+chown :users ${IMG_PATH}
+
+# echo "$LFS_LOOP"p > ./persist/format-disk.lock
 
 else
     qemu-nbd -c ${LFS_LOOP} ./${LFS_IMG};
     sleep 1
 fi
+
+mkdir -p ./$LFS
+# chown lfs:lfs $LFS_IMG
+mount "$LFS_LOOP"p4 ./$LFS && \
+mkdir -p ./$LFS/boot && \
+mount "$LFS_LOOP"p2 ./$LFS/boot && \
+mkdir -p ./$LFS/boot/efi && \
+mount "$LFS_LOOP"p1 ./$LFS/boot/efi && \
+echo "Mount successfully!"

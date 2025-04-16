@@ -30,3 +30,10 @@ sudo chroot "$LFS" /tools/bin/env -i \
     PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin \
 	LFS_ARCH=$LFS_ARCH \
     /tools/bin/bash --login +h
+
+echo "Unmount and unbind system devices..."
+sudo umount -v -R $LFS/dev/pts
+sudo umount -v -R $LFS/dev
+sudo umount -v $LFS/proc
+sudo umount -v $LFS/sys
+sudo umount -v $LFS/run

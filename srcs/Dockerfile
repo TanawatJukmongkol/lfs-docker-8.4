@@ -23,7 +23,7 @@ libguestfs-tools \
 sudo
 
 RUN     groupadd lfs
-RUN     useradd -s /bin/bash -g lfs -u 1000 -k /dev/null -m lfs
+RUN     useradd -s /bin/bash -g lfs -k /dev/null -m lfs
 
 RUN		adduser lfs sudo
 RUN		echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers

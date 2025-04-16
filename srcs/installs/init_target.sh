@@ -6,6 +6,14 @@ source /installs/utils.sh
 BUILD_DIR=/tmp/build/system_build/
 SRC_DIR=/sources/
 
+sudo chroot "$LFS" /tools/bin/env -i \
+    HOME=/root                  \
+    TERM="$TERM"                \
+    PS1='(lfs chroot) \u:\w\$ ' \
+    PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin \
+	LFS_ARCH=$LFS_ARCH \
+/tools/bin/bash --login +h -x << CHROOT_EOF
+
 mkdir -p $BUILD_DIR
 
 # Chapter 6 build system
@@ -98,3 +106,5 @@ touch /var/log/{btmp,lastlog,faillog,wtmp}
 chgrp -v utmp /var/log/lastlog
 chmod -v 664  /var/log/lastlog
 chmod -v 600  /var/log/btmp
+
+CHROOT_EOF

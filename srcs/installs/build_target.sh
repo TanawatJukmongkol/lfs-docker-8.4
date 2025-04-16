@@ -353,122 +353,9 @@ make -j$BUILD_JOBS $MAKE_FLAGS install-html
 
 EOF
 
-# If you want, install cracklib here
+# Install cracklib here (if you want)
 
-install_package Linux-PAM-1.3.0.tar.bz2 << EOF
-
-tar -xf /sources/Linux-PAM-1.2.0-docs.tar.bz2 --strip-components=1
-
-./configure --prefix=/usr                    \
-            --sysconfdir=/etc                \
-            --libdir=/usr/lib                \
-            --disable-regenerate-docu        \
-            --enable-securedir=/lib/security \
-            --docdir=/usr/share/doc/Linux-PAM-1.3.0 &&
-
-make -j$BUILD_JOBS $MAKE_FLAGS
-
-if [ ! -d /etc/pam.d ]; then
-
-install -v -m755 -d /etc/pam.d &&
-
-cat > /etc/pam.d/other << "LFS_EOF"
-auth     required       pam_deny.so
-account  required       pam_deny.so
-password required       pam_deny.so
-session  required       pam_deny.so
-LFS_EOF
-
-rm -fv /etc/pam.d/*
-
-make install &&
-chmod -v 4755 /sbin/unix_chkpwd &&
-
-for file in pam pam_misc pamc
-do
-  mv -v /usr/lib/lib\${file}.so.* /lib &&
-  ln -sfv ../../lib/\$(readlink /usr/lib/lib\${file}.so) /usr/lib/lib\${file}.so
-done
-
-fi
-
-install -vdm755 /etc/pam.d &&
-cat > /etc/pam.d/system-account << "LFS_EOF" &&
-# Begin /etc/pam.d/system-account
-
-account   required    pam_unix.so
-
-# End /etc/pam.d/system-account
-LFS_EOF
-
-cat > /etc/pam.d/system-auth << "LFS_EOF" &&
-# Begin /etc/pam.d/system-auth
-
-auth      required    pam_unix.so
-
-# End /etc/pam.d/system-auth
-LFS_EOF
-
-cat > /etc/pam.d/system-session << "LFS_EOF"
-# Begin /etc/pam.d/system-session
-
-session   required    pam_unix.so
-
-# End /etc/pam.d/system-session
-LFS_EOF
-
-if [ -d /lib/cracklib ]; then
-
-cat > /etc/pam.d/system-password << "LFS_EOF"
-# Begin /etc/pam.d/system-password
-
-# check new passwords for strength (man pam_cracklib)
-password  required    pam_cracklib.so    authtok_type=UNIX retry=1 difok=5 \
-                                         minlen=9 dcredit=1 ucredit=1 \
-                                         lcredit=1 ocredit=1 minclass=0 \
-                                         maxrepeat=0 maxsequence=0 \
-                                         maxclassrepeat=0 \
-                                         dictpath=/lib/cracklib/pw_dict
-# use sha512 hash for encryption, use shadow, and use the
-# authentication token (chosen password) set by pam_cracklib
-# above (or any previous modules)
-password  required    pam_unix.so        sha512 shadow use_authtok
-
-# End /etc/pam.d/system-password
-LFS_EOF
-
-else
-
-cat > /etc/pam.d/system-password << "LFS_EOF"
-# Begin /etc/pam.d/system-password
-
-# use sha512 hash for encryption, use shadow, and try to use any previously
-# defined authentication token (chosen password) set by any prior module
-password  required    pam_unix.so       sha512 shadow try_first_pass
-
-# End /etc/pam.d/system-password
-LFS_EOF
-
-fi
-
-cat > /etc/pam.d/other << "LFS_EOF"
-# Begin /etc/pam.d/other
-
-auth        required        pam_warn.so
-auth        required        pam_deny.so
-account     required        pam_warn.so
-account     required        pam_deny.so
-password    required        pam_warn.so
-password    required        pam_deny.so
-session     required        pam_warn.so
-session     required        pam_deny.so
-
-# End /etc/pam.d/other
-LFS_EOF
-
-EOF
-
-install_package shadow-4.6.tar.xz << EOF
+install_package shadow-4.6.tar.xz 1 << EOF
 
 sed -i 's/groups\$(EXEEXT) //' src/Makefile.in
 find man -name Makefile.in -exec sed -i 's/groups\.1 / /'   {} \;
@@ -496,12 +383,8 @@ grpconv
 
 sed -i 's/yes/no/' /etc/default/useradd
 
-passwd root << PASSWD
-lfs
-lfs
-lfs
-
-PASSWD
+passwd root
+# echo "lfs" | passwd root --stdin
 
 EOF
 
@@ -1135,11 +1018,36 @@ EOF
 
 install_package groff-1.22.4.tar.gz << EOF
 
-PAGE=<paper_size> ./configure --prefix=/usr
+PAGE=A4 ./configure --prefix=/usr
 
 make -j1
 
 make install
+
+EOF
+
+install_package dosfstools-4.1.tar.xz << EOF
+
+./configure --prefix=/               \
+            --enable-compat-symlinks \
+            --mandir=/usr/share/man  \
+            --docdir=/usr/share/doc/dosfstools-4.1
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package efivar-37.tar.bz2 << EOF
+
+patch -Np1 -i $SRC_DIR/efivar-37-gcc_9-1.patch
+
+make -j$BUILD_JOBS $MAKE_FLAGS LIBDIR=/usr/lib BINDIR=/bin CFLAGS="-O2 -Wno-stringop-truncation"
+make -j$BUILD_JOBS $MAKE_FLAGS LIBDIR=/usr/lib BINDIR=/bin install
+
+mv -v /usr/lib/lib{efivar,efiboot}.so.* /lib
+ln -sfv ../../lib/\$(readlink /usr/lib/libefivar.so) /usr/lib/libefivar.so
+ln -sfv ../../lib/\$(readlink /usr/lib/libefiboot.so) /usr/lib/libefiboot.so
 
 EOF
 
@@ -1150,14 +1058,8 @@ make -j$BUILD_JOBS $MAKE_FLAGS
 
 make -j$BUILD_JOBS $MAKE_FLAGS install
 
-EOF
-
-install_package efivar-37.tar.bz2 << EOF
-
-patch -Np1 -i $SRC_DIR/efivar-37-gcc_9-1.patch
-
-make -j$BUILD_JOBS $MAKE_FLAGS CFLAGS="-O2 -Wno-stringop-truncation"
-make -j$BUILD_JOBS $MAKE_FLAGS install LIBDIR=/usr/lib
+mv -v /usr/lib/libpopt.so.* /lib
+ln -sfv ../../lib/\$(readlink /usr/lib/libpopt.so) /usr/lib/libpopt.so
 
 EOF
 
@@ -1165,8 +1067,8 @@ install_package efibootmgr-17.tar.gz << EOF
 
 sed -e '/extern int efi_set_verbose/d' -i src/efibootmgr.c
 
-make -j$BUILD_JOBS $MAKE_FLAGS EFIDIR=LFS EFI_LOADER=grubx64.efi
-make -j$BUILD_JOBS $MAKE_FLAGS install EFIDIR=LFS
+make -j$BUILD_JOBS $MAKE_FLAGS sbindir=/sbin EFIDIR=LFS EFI_LOADER=grubx64.efi
+make -j$BUILD_JOBS $MAKE_FLAGS sbindir=/sbin EFIDIR=LFS EFI_LOADER=grubx64.efi install
 
 EOF
 
@@ -1174,15 +1076,19 @@ install_package grub-2.02.tar.xz << EOF
 
 # Patch grub EFI bug not mentioned in the LFS book.
 # https://wiki.linuxfromscratch.org/lfs/ticket/4354
-sed -i '/R_X86_64_PC32:/a case R_X86_64_PLT32:' util/grub-mkimagexx.c
-sed -i '/R_X86_64_PC32,/a R_X86_64_PLT32,'      util/grub-module-verifier.c
+
+# sed -i '/R_X86_64_PC32:/a case R_X86_64_PLT32:' util/grub-mkimagexx.c
+# sed -i '/R_X86_64_PC32,/a R_X86_64_PLT32,'      util/grub-module-verifier.c
 
 ./configure --prefix=/usr \
---sbindir=/sbin \
---sysconfdir=/etc \
---disable-efiemu \
---disable-werror \
---with-platform=efi # GRUB with EFI support
+            --sbindir=/sbin \
+            --sysconfdir=/etc \
+            --disable-efiemu \
+            --target=x86_64 \
+            --with-platform=efi \
+            --disable-werror
+
+# --enable-grub-mkfont \
 
 make -j$BUILD_JOBS $MAKE_FLAGS
 make -j$BUILD_JOBS $MAKE_FLAGS install
@@ -1514,6 +1420,360 @@ install-info --dir-file=/usr/share/info/dir /usr/share/info/com_err.info
 
 EOF
 
+install_package Linux-PAM-1.3.0.tar.bz2 << EOF
+
+tar -xf /sources/Linux-PAM-1.2.0-docs.tar.bz2 --strip-components=1
+
+./configure --prefix=/usr                    \
+            --sysconfdir=/etc                \
+            --libdir=/usr/lib                \
+            --disable-regenerate-docu        \
+            --enable-securedir=/lib/security \
+            --docdir=/usr/share/doc/Linux-PAM-1.3.0 &&
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+
+if [ ! -d /etc/pam.d ]; then
+
+install -v -m755 -d /etc/pam.d &&
+
+cat > /etc/pam.d/other << "LFS_EOF"
+auth     required       pam_deny.so
+account  required       pam_deny.so
+password required       pam_deny.so
+session  required       pam_deny.so
+LFS_EOF
+
+rm -fv /etc/pam.d/*
+
+make install &&
+chmod -v 4755 /sbin/unix_chkpwd &&
+
+for file in pam pam_misc pamc
+do
+  mv -v /usr/lib/lib\${file}.so.* /lib &&
+  ln -sfv ../../lib/\$(readlink /usr/lib/lib\${file}.so) /usr/lib/lib\${file}.so
+done
+
+fi
+
+install -vdm755 /etc/pam.d &&
+cat > /etc/pam.d/system-account << "LFS_EOF" &&
+# Begin /etc/pam.d/system-account
+
+account   required    pam_unix.so
+
+# End /etc/pam.d/system-account
+LFS_EOF
+
+cat > /etc/pam.d/system-auth << "LFS_EOF" &&
+# Begin /etc/pam.d/system-auth
+
+auth      required    pam_unix.so
+
+# End /etc/pam.d/system-auth
+LFS_EOF
+
+cat > /etc/pam.d/system-session << "LFS_EOF"
+# Begin /etc/pam.d/system-session
+
+session   required    pam_unix.so
+
+# End /etc/pam.d/system-session
+LFS_EOF
+
+if [ -d /lib/cracklib ]; then
+
+cat > /etc/pam.d/system-password << "LFS_EOF"
+# Begin /etc/pam.d/system-password
+
+# check new passwords for strength (man pam_cracklib)
+password  required    pam_cracklib.so    authtok_type=UNIX retry=1 difok=5 \
+                                         minlen=9 dcredit=1 ucredit=1 \
+                                         lcredit=1 ocredit=1 minclass=0 \
+                                         maxrepeat=0 maxsequence=0 \
+                                         maxclassrepeat=0 \
+                                         dictpath=/lib/cracklib/pw_dict
+# use sha512 hash for encryption, use shadow, and use the
+# authentication token (chosen password) set by pam_cracklib
+# above (or any previous modules)
+password  required    pam_unix.so        sha512 shadow use_authtok
+
+# End /etc/pam.d/system-password
+LFS_EOF
+
+else
+
+cat > /etc/pam.d/system-password << "LFS_EOF"
+# Begin /etc/pam.d/system-password
+
+# use sha512 hash for encryption, use shadow, and try to use any previously
+# defined authentication token (chosen password) set by any prior module
+password  required    pam_unix.so       sha512 shadow try_first_pass
+
+# End /etc/pam.d/system-password
+LFS_EOF
+
+fi
+
+cat > /etc/pam.d/other << "LFS_EOF"
+# Begin /etc/pam.d/other
+
+auth        required        pam_warn.so
+auth        required        pam_deny.so
+account     required        pam_warn.so
+account     required        pam_deny.so
+password    required        pam_warn.so
+password    required        pam_deny.so
+session     required        pam_warn.so
+session     required        pam_deny.so
+
+# End /etc/pam.d/other
+LFS_EOF
+
+EOF
+
+install_package shadow-4.6.tar.xz 2 << EOF
+
+sed -i 's/groups$(EXEEXT) //' src/Makefile.in &&
+
+find man -name Makefile.in -exec sed -i 's/groups\.1 / /'   {} \; &&
+find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /' {} \; &&
+find man -name Makefile.in -exec sed -i 's/passwd\.5 / /'   {} \; &&
+
+sed -i -e 's@#ENCRYPT_METHOD DES@ENCRYPT_METHOD SHA512@' \
+       -e 's@/var/spool/mail@/var/mail@' etc/login.defs &&
+
+sed -i 's/1000/999/' etc/useradd                           &&
+
+./configure --sysconfdir=/etc --with-group-name-max-length=32 &&
+make -j$BUILD_JOBS $MAKE_FLAGS
+
+make -j$BUILD_JOBS $MAKE_FLAGS install &&
+mv -v /usr/bin/passwd /bin
+
+install -v -m644 /etc/login.defs /etc/login.defs.orig &&
+for FUNCTION in FAIL_DELAY               \
+                FAILLOG_ENAB             \
+                LASTLOG_ENAB             \
+                MAIL_CHECK_ENAB          \
+                OBSCURE_CHECKS_ENAB      \
+                PORTTIME_CHECKS_ENAB     \
+                QUOTAS_ENAB              \
+                CONSOLE MOTD_FILE        \
+                FTMP_FILE NOLOGINS_FILE  \
+                ENV_HZ PASS_MIN_LEN      \
+                SU_WHEEL_ONLY            \
+                CRACKLIB_DICTPATH        \
+                PASS_CHANGE_TRIES        \
+                PASS_ALWAYS_WARN         \
+                CHFN_AUTH ENCRYPT_METHOD \
+                ENVIRON_FILE
+do
+    sed -i "s/^\${FUNCTION}/# &/" /etc/login.defs
+done
+
+cat > /etc/pam.d/login << "LFS_EOF"
+# Begin /etc/pam.d/login
+
+# Set failure delay before next prompt to 3 seconds
+auth      optional    pam_faildelay.so  delay=3000000
+
+# Check to make sure that the user is allowed to login
+auth      requisite   pam_nologin.so
+
+# Check to make sure that root is allowed to login
+# Disabled by default. You will need to create /etc/securetty
+# file for this module to function. See man 5 securetty.
+#auth      required    pam_securetty.so
+
+# Additional group memberships - disabled by default
+#auth      optional    pam_group.so
+
+# include system auth settings
+auth      include     system-auth
+
+# check access for the user
+account   required    pam_access.so
+
+# include system account settings
+account   include     system-account
+
+# Set default environment variables for the user
+session   required    pam_env.so
+
+# Set resource limits for the user
+session   required    pam_limits.so
+
+# Display date of last login - Disabled by default
+#session   optional    pam_lastlog.so
+
+# Display the message of the day - Disabled by default
+#session   optional    pam_motd.so
+
+# Check user's mail - Disabled by default
+#session   optional    pam_mail.so      standard quiet
+
+# include system session and password settings
+session   include     system-session
+password  include     system-password
+
+# End /etc/pam.d/login
+LFS_EOF
+
+cat > /etc/pam.d/passwd << "LFS_EOF"
+# Begin /etc/pam.d/passwd
+
+password  include     system-password
+
+# End /etc/pam.d/passwd
+LFS_EOF
+
+cat > /etc/pam.d/su << "LFS_EOF"
+# Begin /etc/pam.d/su
+
+# always allow root
+auth      sufficient  pam_rootok.so
+
+# Allow users in the wheel group to execute su without a password
+# disabled by default
+#auth      sufficient  pam_wheel.so trust use_uid
+
+# include system auth settings
+auth      include     system-auth
+
+# limit su to users in the wheel group
+auth      required    pam_wheel.so use_uid
+
+# include system account settings
+account   include     system-account
+
+# Set default environment variables for the service user
+session   required    pam_env.so
+
+# include system session settings
+session   include     system-session
+
+# End /etc/pam.d/su
+LFS_EOF
+
+cat > /etc/pam.d/chage << "LFS_EOF"
+# Begin /etc/pam.d/chage
+
+# always allow root
+auth      sufficient  pam_rootok.so
+
+# include system auth, account, and session settings
+auth      include     system-auth
+account   include     system-account
+session   include     system-session
+
+# Always permit for authentication updates
+password  required    pam_permit.so
+
+# End /etc/pam.d/chage
+LFS_EOF
+
+for PROGRAM in chfn chgpasswd chpasswd chsh groupadd groupdel \
+               groupmems groupmod newusers useradd userdel usermod
+do
+    install -v -m644 /etc/pam.d/chage /etc/pam.d/\${PROGRAM}
+    sed -i "s/chage/\$PROGRAM/" /etc/pam.d/\${PROGRAM}
+done
+
+rm -f /run/nologin
+
+[ -f /etc/login.access ] && mv -v /etc/login.access{,.NOUSE}
+
+[ -f /etc/limits ] && mv -v /etc/limits{,.NOUSE}
+
+EOF
+
+## MAIN INSTALL DONE! ##
+
+install_package lynx2.8.9rel.1.tar.bz2 << EOF
+
+./configure --prefix=/usr          \
+            --sysconfdir=/etc/lynx \
+            --datadir=/usr/share/doc/lynx-2.8.9rel.1 \
+            --with-zlib            \
+            --with-bzlib           \
+            --with-ssl             \
+            --with-screen=ncursesw \
+            --enable-locale-charset
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install-full
+
+chgrp -v -R root /usr/share/doc/lynx-2.8.9rel.1/lynx_doc
+
+sed -e '/#LOCALE/     a LOCALE_CHARSET:TRUE'     \
+    -i /etc/lynx/lynx.cfg
+
+sed -e '/#DEFAULT_ED/ a DEFAULT_EDITOR:vi'       \
+    -i /etc/lynx/lynx.cfg
+
+sed -e '/#PERSIST/    a PERSISTENT_COOKIES:TRUE' \
+    -i /etc/lynx/lynx.cfg
+
+EOF
+
+install_package openssh-7.9p1.tar.gz << EOF
+
+install  -v -m700 -d /var/lib/sshd &&
+chown    -v root:sys /var/lib/sshd &&
+
+groupadd -g 50 sshd        &&
+useradd  -c 'sshd PrivSep' \
+         -d /var/lib/sshd  \
+         -g sshd           \
+         -s /bin/false     \
+         -u 50 sshd
+
+patch -Np1 -i $SRC_DIR/openssh-7.9p1-security_fix-1.patch &&
+./configure --prefix=/usr                     \
+            --sysconfdir=/etc/ssh             \
+            --with-md5-passwords              \
+            --with-privsep-path=/var/lib/sshd &&
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install &&
+install -v -m755    contrib/ssh-copy-id /usr/bin     &&
+
+install -v -m644    contrib/ssh-copy-id.1 \
+                    /usr/share/man/man1              &&
+install -v -m755 -d /usr/share/doc/openssh-7.9p1     &&
+install -v -m644    INSTALL LICENCE OVERVIEW README* \
+                    /usr/share/doc/openssh-7.9p1
+
+# Temporary permitting root login (needs to be changed after installation)
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+
+sed 's@d/login@d/sshd@g' /etc/pam.d/login > /etc/pam.d/sshd &&
+chmod 644 /etc/pam.d/sshd &&
+echo "UsePAM yes" >> /etc/ssh/sshd_config
+
+EOF
+
+install_package wget-1.20.1.tar.gz << EOF
+
+./configure --prefix=/usr      \
+            --sysconfdir=/etc  \
+            --with-ssl=openssl
+
+make -j$BUILD_JOBS $MAKE_FLAGS
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+EOF
+
+install_package blfs-systemd-units-20180105.tar.bz2 << EOF
+
+make install-sshd
+
+EOF
+
+# Clean up
+
 rm -f /usr/lib/lib{bfd,opcodes}.a
 rm -f /usr/lib/libbz2.a
 rm -f /usr/lib/lib{com_err,e2p,ext2fs,ss}.a
@@ -1522,4 +1782,3 @@ rm -f /usr/lib/libfl.a
 rm -f /usr/lib/libz.a
 
 find /usr/lib /usr/libexec -name \*.la -delete
-

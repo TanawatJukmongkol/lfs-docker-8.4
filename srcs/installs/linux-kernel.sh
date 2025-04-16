@@ -11,6 +11,7 @@ if [ ! -d $SRC_DIR ]; then
     mkdir -p $SRC_DIR
     tar -xvf  $TAR_DIR/linux-"$KERNEL_VER".tar.xz -C $SRC_DIR --strip-components=1
     make -j$BUILD_JOBS $MAKE_FLAGS -C $SRC_DIR mrproper
+    make -j$BUILD_JOBS $MAKE_FLAGS -C $SRC_DIR defconfig
 fi
 
 pushd $SRC_DIR
