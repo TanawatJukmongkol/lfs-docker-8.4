@@ -3,6 +3,8 @@
 
 # sudo chown -R root:root $LFS/tools
 
+cp -r ~/srcs/installs $LFS
+
 echo "Creating initial device nodes..."
 
 sudo mkdir -pv $LFS/{dev,proc,sys,run}

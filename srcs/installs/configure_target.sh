@@ -174,4 +174,7 @@ LABEL=LFS_SWAP     swap         swap     pri=1               0     0
 # End /etc/fstab
 EOF
 
+bash /installs/linux-kernel.sh
+bash /installs/grub-install.sh
+
 CHROOT_EOF
