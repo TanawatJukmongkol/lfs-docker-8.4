@@ -1077,8 +1077,8 @@ install_package grub-2.02.tar.xz << EOF
 # Patch grub EFI bug not mentioned in the LFS book.
 # https://wiki.linuxfromscratch.org/lfs/ticket/4354
 
-# sed -i '/R_X86_64_PC32:/a case R_X86_64_PLT32:' util/grub-mkimagexx.c
-# sed -i '/R_X86_64_PC32,/a R_X86_64_PLT32,'      util/grub-module-verifier.c
+sed -i '/R_X86_64_PC32:/a case R_X86_64_PLT32:' util/grub-mkimagexx.c
+sed -i '/R_X86_64_PC32,/a R_X86_64_PLT32,'      util/grub-module-verifier.c
 
 ./configure --prefix=/usr \
             --sbindir=/sbin \
@@ -1268,7 +1268,7 @@ unset VIMRUNTIME
 
 EOF
 
-install_package systemd-240.tar.gz << EOF
+install_package systemd-240.tar.gz 1 << EOF
 
 patch -Np1 -i $SRC_DIR/systemd-240-security_fixes-2.patch
 
@@ -1435,16 +1435,17 @@ make -j$BUILD_JOBS $MAKE_FLAGS
 
 if [ ! -d /etc/pam.d ]; then
 
-install -v -m755 -d /etc/pam.d &&
+install -v -m755 -d /etc/pam.d
 
-cat > /etc/pam.d/other << "LFS_EOF"
-auth     required       pam_deny.so
-account  required       pam_deny.so
-password required       pam_deny.so
-session  required       pam_deny.so
-LFS_EOF
+# cat > /etc/pam.d/other << "LFS_EOF"
+# auth     required       pam_deny.so
+# account  required       pam_deny.so
+# password required       pam_deny.so
+# session  required       pam_deny.so
+# LFS_EOF
 
-rm -fv /etc/pam.d/*
+# make check
+# rm -fv /etc/pam.d/*
 
 make install &&
 chmod -v 4755 /sbin/unix_chkpwd &&
@@ -1689,6 +1690,65 @@ rm -f /run/nologin
 
 EOF
 
+install_package systemd-240.tar.gz 2 << EOF
+
+patch -Np1 -i ../systemd-240-security_fixes-2.patch
+
+sed -i 's/GROUP="render", //' rules/50-udev-default.rules.in
+
+mkdir build &&
+cd    build &&
+
+meson --prefix=/usr         \
+      --sysconfdir=/etc     \
+      --localstatedir=/var  \
+      -Dblkid=true          \
+      -Dbuildtype=release   \
+      -Ddefault-dnssec=no   \
+      -Dfirstboot=false     \
+      -Dinstall-tests=false \
+      -Dldconfig=false      \
+      -Drootprefix=         \
+      -Drootlibdir=/lib     \
+      -Dsplit-usr=true      \
+      -Dsysusers=false      \
+      -Db_lto=false         \
+      ..                    &&
+ninja
+
+ninja install
+rm -rfv /usr/lib/rpm
+
+cat >> /etc/pam.d/system-session << "LFS_EOF"
+# Begin Systemd addition
+    
+session  required    pam_loginuid.so
+session  optional    pam_systemd.so
+
+# End Systemd addition
+LFS_EOF
+
+cat > /etc/pam.d/systemd-user << "LFS_EOF"
+# Begin /etc/pam.d/systemd-user
+
+account  required    pam_access.so
+account  include     system-account
+
+session  required    pam_env.so
+session  required    pam_limits.so
+session  required    pam_unix.so
+session  required    pam_loginuid.so
+session  optional    pam_keyinit.so force revoke
+session  optional    pam_systemd.so
+
+auth     required    pam_deny.so
+password required    pam_deny.so
+
+# End /etc/pam.d/systemd-user
+LFS_EOF
+
+EOF
+
 ## MAIN INSTALL DONE! ##
 
 install_package lynx2.8.9rel.1.tar.bz2 << EOF
@@ -1782,3 +1842,26 @@ rm -f /usr/lib/libfl.a
 rm -f /usr/lib/libz.a
 
 find /usr/lib /usr/libexec -name \*.la -delete
+
+# Add OS info!
+
+export CODENAME=$HOSTNAME
+
+cat > /etc/os-release << EOF
+NAME="Linux From Scratch"
+VERSION="8.4-systemd"
+ID=lfs
+PRETTY_NAME="Linux From Scratch 8.4-systemd"
+VERSION_CODENAME="$CODENAME"
+EOF
+
+echo 8.4-systemd > /etc/lfs-release
+
+cat > /etc/lsb-release << EOF
+DISTRIB_ID="Linux From Scratch"
+DISTRIB_RELEASE="8.4-systemd"
+DISTRIB_CODENAME="$CODENAME"
+DISTRIB_DESCRIPTION="Linux From Scratch"
+EOF
+
+unset CODENAME
