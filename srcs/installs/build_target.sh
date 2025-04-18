@@ -807,7 +807,7 @@ EOF
 
 install_package gettext-0.19.8.1.tar.xz << EOF
 
-sed -i '/^TESTS =/d' gettext-runtime/tests/Makefile.in &&
+sed -i '/^TESTS =/d' gettext-runtime/tests/Makefile.in
 sed -i 's/test-lock..EXEEXT.//' gettext-tools/gnulib-tests/Makefile.in
 
 sed -e '/AppData/{N;N;p;s/\.appdata\./.metainfo./}' \
@@ -1053,9 +1053,9 @@ EOF
 
 install_package popt-1.18.tar.gz << EOF
 
-./configure --prefix=/usr --disable-static && \
-make -j$BUILD_JOBS $MAKE_FLAGS
+./configure --prefix=/usr --disable-static
 
+make -j$BUILD_JOBS $MAKE_FLAGS
 make -j$BUILD_JOBS $MAKE_FLAGS install
 
 mv -v /usr/lib/libpopt.so.* /lib
@@ -1429,7 +1429,7 @@ tar -xf /sources/Linux-PAM-1.2.0-docs.tar.bz2 --strip-components=1
             --libdir=/usr/lib                \
             --disable-regenerate-docu        \
             --enable-securedir=/lib/security \
-            --docdir=/usr/share/doc/Linux-PAM-1.3.0 &&
+            --docdir=/usr/share/doc/Linux-PAM-1.3.0
 
 make -j$BUILD_JOBS $MAKE_FLAGS
 
@@ -1447,19 +1447,20 @@ install -v -m755 -d /etc/pam.d
 # make check
 # rm -fv /etc/pam.d/*
 
-make install &&
-chmod -v 4755 /sbin/unix_chkpwd &&
+make install
+chmod -v 4755 /sbin/unix_chkpwd
 
 for file in pam pam_misc pamc
 do
-  mv -v /usr/lib/lib\${file}.so.* /lib &&
+  mv -v /usr/lib/lib\${file}.so.* /lib && \
   ln -sfv ../../lib/\$(readlink /usr/lib/lib\${file}.so) /usr/lib/lib\${file}.so
 done
 
 fi
 
-install -vdm755 /etc/pam.d &&
-cat > /etc/pam.d/system-account << "LFS_EOF" &&
+install -vdm755 /etc/pam.d
+
+cat > /etc/pam.d/system-account << "LFS_EOF"
 # Begin /etc/pam.d/system-account
 
 account   required    pam_unix.so
@@ -1467,7 +1468,7 @@ account   required    pam_unix.so
 # End /etc/pam.d/system-account
 LFS_EOF
 
-cat > /etc/pam.d/system-auth << "LFS_EOF" &&
+cat > /etc/pam.d/system-auth << "LFS_EOF"
 # Begin /etc/pam.d/system-auth
 
 auth      required    pam_unix.so
@@ -1536,24 +1537,25 @@ EOF
 
 install_package shadow-4.6.tar.xz 2 << EOF
 
-sed -i 's/groups$(EXEEXT) //' src/Makefile.in &&
+sed -i 's/groups$(EXEEXT) //' src/Makefile.in
 
 find man -name Makefile.in -exec sed -i 's/groups\.1 / /'   {} \; &&
 find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /' {} \; &&
 find man -name Makefile.in -exec sed -i 's/passwd\.5 / /'   {} \; &&
 
 sed -i -e 's@#ENCRYPT_METHOD DES@ENCRYPT_METHOD SHA512@' \
-       -e 's@/var/spool/mail@/var/mail@' etc/login.defs &&
+       -e 's@/var/spool/mail@/var/mail@' etc/login.defs
 
-sed -i 's/1000/999/' etc/useradd                           &&
+sed -i 's/1000/999/' etc/useradd
 
-./configure --sysconfdir=/etc --with-group-name-max-length=32 &&
+./configure --sysconfdir=/etc --with-group-name-max-length=32
+
 make -j$BUILD_JOBS $MAKE_FLAGS
-
-make -j$BUILD_JOBS $MAKE_FLAGS install &&
+make -j$BUILD_JOBS $MAKE_FLAGS install
 mv -v /usr/bin/passwd /bin
 
-install -v -m644 /etc/login.defs /etc/login.defs.orig &&
+install -v -m644 /etc/login.defs /etc/login.defs.orig
+
 for FUNCTION in FAIL_DELAY               \
                 FAILLOG_ENAB             \
                 LASTLOG_ENAB             \
@@ -1696,8 +1698,8 @@ patch -Np1 -i ../systemd-240-security_fixes-2.patch
 
 sed -i 's/GROUP="render", //' rules/50-udev-default.rules.in
 
-mkdir build &&
-cd    build &&
+mkdir build
+cd    build
 
 meson --prefix=/usr         \
       --sysconfdir=/etc     \
@@ -1713,10 +1715,11 @@ meson --prefix=/usr         \
       -Dsplit-usr=true      \
       -Dsysusers=false      \
       -Db_lto=false         \
-      ..                    &&
-ninja
+      ..
 
+ninja
 ninja install
+
 rm -rfv /usr/lib/rpm
 
 cat >> /etc/pam.d/system-session << "LFS_EOF"
@@ -1780,38 +1783,41 @@ EOF
 
 install_package openssh-7.9p1.tar.gz << EOF
 
-install  -v -m700 -d /var/lib/sshd &&
-chown    -v root:sys /var/lib/sshd &&
+install  -v -m700 -d /var/lib/sshd
+chown    -v root:sys /var/lib/sshd
 
-groupadd -g 50 sshd        &&
+groupadd -g 50 sshd        && \
 useradd  -c 'sshd PrivSep' \
          -d /var/lib/sshd  \
          -g sshd           \
          -s /bin/false     \
          -u 50 sshd
 
-patch -Np1 -i $SRC_DIR/openssh-7.9p1-security_fix-1.patch &&
+patch -Np1 -i $SRC_DIR/openssh-7.9p1-security_fix-1.patch
 ./configure --prefix=/usr                     \
             --sysconfdir=/etc/ssh             \
             --with-md5-passwords              \
-            --with-privsep-path=/var/lib/sshd &&
+            --with-privsep-path=/var/lib/sshd
 
 make -j$BUILD_JOBS $MAKE_FLAGS
-make -j$BUILD_JOBS $MAKE_FLAGS install &&
-install -v -m755    contrib/ssh-copy-id /usr/bin     &&
+make -j$BUILD_JOBS $MAKE_FLAGS install
+
+install -v -m755    contrib/ssh-copy-id /usr/bin
 
 install -v -m644    contrib/ssh-copy-id.1 \
-                    /usr/share/man/man1              &&
-install -v -m755 -d /usr/share/doc/openssh-7.9p1     &&
+                    /usr/share/man/man1              && \
+install -v -m755 -d /usr/share/doc/openssh-7.9p1     && \
 install -v -m644    INSTALL LICENCE OVERVIEW README* \
                     /usr/share/doc/openssh-7.9p1
 
 # Temporary permitting root login (needs to be changed after installation)
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 
-sed 's@d/login@d/sshd@g' /etc/pam.d/login > /etc/pam.d/sshd &&
-chmod 644 /etc/pam.d/sshd &&
-echo "UsePAM yes" >> /etc/ssh/sshd_config
+if [ ! -f /etc/ssh/sshd_config ]; then
+  sed 's@d/login@d/sshd@g' /etc/pam.d/login > /etc/pam.d/sshd
+  chmod 644 /etc/pam.d/sshd
+  echo "UsePAM yes" >> /etc/ssh/sshd_config
+fi
 
 EOF
 
